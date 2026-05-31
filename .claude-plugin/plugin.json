@@ -6,9 +6,6 @@
     "name": "morty-lou"
   },
   "homepage": "https://github.com/morty-lou/parallel-dev-workflow-plugin",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/morty-lou/parallel-dev-workflow-plugin"
-  },
+  "repository": "https://github.com/morty-lou/parallel-dev-workflow-plugin",
   "license": "MIT"
 }
