@@ -1,6 +1,8 @@
 ---
 name: code-writer
 description: 专职代码写作子 agent。接收完整任务包（目标文件、工作内容、依赖接口、背景信息），独立完成代码实现后返回变更摘要。不负责审查和测试。当主 agent 需要实现某个模块、新增文件或修改现有代码时由 Task 工具调用。
+model: sonnet
+mode: bypassPermissions
 tools: Read, Write, Edit, Bash
 ---
 
