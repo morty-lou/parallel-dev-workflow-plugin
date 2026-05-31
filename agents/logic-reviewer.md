@@ -17,9 +17,9 @@ memory: project
 ## 可用搜索工具
 
 ```bash
-git diff main...HEAD                    # 获取完整变更
-git diff main...HEAD --name-only        # 变更文件列表
-git diff main...HEAD -- src/xxx/yyy.ts  # 单文件变更
+git diff <base-branch>...HEAD                    # 获取完整变更
+git diff <base-branch>...HEAD --name-only        # 变更文件列表
+git diff <base-branch>...HEAD -- src/xxx/yyy.ts  # 单文件变更
 
 rg "functionName" src/          # 追踪调用点
 rg -n "interface IFoo" src/     # 找接口定义（带行号）

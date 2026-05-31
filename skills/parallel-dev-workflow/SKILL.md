@@ -90,18 +90,16 @@ Task-2 ──► Task-3
 
 ---
 
-## Phase 2：Worktree 隔离
+## Phase 2：创建特性分支
 
 ```bash
-# 先记录当前分支：它就是 worktree 切出前的「原分支」，
-# 后续 Phase 4/5/6 的 diff、codex 审查基线、合并目标都以它为准。
+# 先记录当前分支作为 base-branch，后续 diff、审查、合并都以它为准。
 git branch --show-current   # 输出可能是 main / dev / 其他分支，记下这个值
 
-git worktree add ../$(basename $PWD)-feature -b feature/<task-name>
-cd ../$(basename $PWD)-feature
+git checkout -b feature/<task-name>
 ```
 
-> 下文出现的 `<base-branch>` 一律替换为上面记录的原分支名。shell 变量不跨 Bash 调用保留，请直接代入实际分支名，不要假定为 `main`。
+> 下文出现的 `<base-branch>` 一律替换为上面记录的原分支名。不要假定为 `main`。
 
 ---
 
@@ -188,8 +186,9 @@ node "$(find ~/.claude/plugins/cache/openai-codex -name 'codex-companion.mjs' -t
 # 单测：覆盖正常路径、边界、错误路径
 <your-test-command>
 
-# 全部通过后合并回原分支
+# 全部通过后合并回原分支（不自动 commit，用户自行 review 后提交）
 git checkout <base-branch>
-git merge feature/<task-name> --no-ff -m "feat: <task-name>"
-git worktree remove ../$(basename $PWD)-feature
+git merge feature/<task-name> --no-ff --no-commit
 ```
+
+> 合并后改动已在暂存区，**请用户 review 后自行 `git commit`**，主 agent 不要代提交。

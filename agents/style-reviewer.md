@@ -17,7 +17,7 @@ memory: project
 ## 可用搜索工具
 
 ```bash
-git diff main...HEAD --name-only             # 获取变更文件列表
+git diff <base-branch>...HEAD --name-only             # 获取变更文件列表
 
 # 建立风格基线时用 fd + rg 快速采样，不要逐行读整个文件
 fd -e ts src/services/ --max-depth 1         # 列出同目录现有文件
