@@ -3,12 +3,12 @@
   "description": "主 agent 主导的并发开发工作流。主 agent 只做规划和决策，代码写作与审查通过 Task 工具并发交给子 agent 执行，保持主 agent context 轻量。包含 code-writer、logic-reviewer、style-reviewer 三个专职子 agent。",
   "version": "1.0.0",
   "author": {
-    "name": "your-username"
+    "name": "morty-lou"
   },
-  "homepage": "https://github.com/your-username/parallel-dev-workflow",
+  "homepage": "https://github.com/morty-lou/parallel-dev-workflow-plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/parallel-dev-workflow"
+    "url": "https://github.com/morty-lou/parallel-dev-workflow-plugin"
   },
   "license": "MIT"
 }
