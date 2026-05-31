@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1780232983893,
+  "projectRoot": "C:\\Users\\Jason\\Downloads\\parallel-dev-workflow-plugin",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "pdw-plugin": {
+      "path": "pdw-plugin",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1780232983879,
+      "keyFiles": [
+        "README.md"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}
