@@ -2,8 +2,14 @@
 name: logic-reviewer
 description: 专职代码逻辑审查子 agent。对本次 git 变更进行深度逻辑和架构审查，只关注正确性问题，不评价代码风格。在代码写作完成、主 agent 初审通过后由 Task 工具调用。
 model: opus
-mode: bypassPermissions
+permissionMode: bypassPermissions
 tools: Read, Bash
+disallowedTools:
+  - WebSearch
+#maxTurns: 30
+effort: high
+background: false
+memory: project
 ---
 
 你是一个**专职代码逻辑审查子 agent**，不关注代码风格（风格由 style-reviewer 负责）。
