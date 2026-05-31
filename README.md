@@ -1,28 +1,27 @@
+
 # parallel-dev-workflow
 
 Claude Code 插件 — 主 agent 主导的并发开发工作流。
 
 ## 安装
 
-### 个人使用（推荐，自动加载）
-
-```bash
-claude plugin init parallel-dev-workflow
-# 或手动：把本目录放到 ~/.claude/skills/parallel-dev-workflow/
+```
+/plugin marketplace add morty-lou/parallel-dev-workflow-plugin
+/plugin install parallel-dev-workflow@morty-lou-plugins
 ```
 
-放到 `~/.claude/skills/` 后，Claude Code 每次启动自动加载，无需额外操作。
+## 使用
 
-### 从 GitHub 安装
+安装后在 Claude Code 中直接说：
 
 ```
-/plugin install github:your-username/parallel-dev-workflow
+用 parallel-dev-workflow 开始长程任务：<需求描述>
 ```
 
-### 本地测试
+或触发 skill：
 
-```bash
-claude --plugin-dir ./parallel-dev-workflow
+```
+/parallel-dev-workflow:parallel-dev-workflow
 ```
 
 ---
@@ -46,16 +45,16 @@ claude --plugin-dir ./parallel-dev-workflow
 ## 包含内容
 
 ```
-parallel-dev-workflow/
 ├── .claude-plugin/
-│   └── plugin.json              ← 插件 manifest
+│   ├── plugin.json              ← 插件 manifest
+│   └── marketplace.json         ← 市场注册文件
 ├── skills/
 │   └── parallel-dev-workflow/
 │       └── SKILL.md             ← 工作流主文档（6 个阶段）
 └── agents/
-    ├── code-writer.md           ← 专职写代码，有 Write 权限
-    ← logic-reviewer.md         ← 专职逻辑审查，只读权限
-    └── style-reviewer.md        ← 专职风格审查，只读权限
+    ├── code-writer.md           ← 专职写代码
+    ├── logic-reviewer.md        ← 专职逻辑审查
+    └── style-reviewer.md        ← 专职风格审查
 ```
 
 插件安装后，三个子 agent 自动注册，主 agent 可直接通过 Task 工具调用。
@@ -75,6 +74,6 @@ Phase 6  优化→单测→合并
 
 ## 卸载
 
-```bash
-rm -rf ~/.claude/skills/parallel-dev-workflow
+```
+/plugin uninstall parallel-dev-workflow
 ```
