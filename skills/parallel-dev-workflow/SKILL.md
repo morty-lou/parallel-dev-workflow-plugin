@@ -93,9 +93,15 @@ Task-2 ──► Task-3
 ## Phase 2：Worktree 隔离
 
 ```bash
+# 先记录当前分支：它就是 worktree 切出前的「原分支」，
+# 后续 Phase 4/5/6 的 diff、codex 审查基线、合并目标都以它为准。
+git branch --show-current   # 输出可能是 main / dev / 其他分支，记下这个值
+
 git worktree add ../$(basename $PWD)-feature -b feature/<task-name>
 cd ../$(basename $PWD)-feature
 ```
+
+> 下文出现的 `<base-branch>` 一律替换为上面记录的原分支名。shell 变量不跨 Bash 调用保留，请直接代入实际分支名，不要假定为 `main`。
 
 ---
 
@@ -130,8 +136,8 @@ Task("code-writer", """
 ## Phase 4：主 agent 初审
 
 ```bash
-git diff main...HEAD --stat   # 变更文件概览
-git diff main...HEAD          # 详细 diff
+git diff <base-branch>...HEAD --stat   # 变更文件概览
+git diff <base-branch>...HEAD          # 详细 diff
 ```
 
 检查：
@@ -149,16 +155,21 @@ git diff main...HEAD          # 详细 diff
 **同时**启动三个 Task：
 
 ```
-Task("logic-reviewer", "请审查 git diff main...HEAD 的变更，重点检查逻辑正确性、接口一致性和潜在 bug，不评价风格。")
+Task("logic-reviewer", "请审查 git diff <base-branch>...HEAD 的变更，重点检查逻辑正确性、接口一致性和潜在 bug，不评价风格。")
 
 Task("style-reviewer", """
 变更文件：<从 git diff --name-only 列出>
 请对每个变更文件，先读取其所在目录的现有文件建立风格基线，再检查新代码的风格一致性。不评价逻辑正确性。
 """)
-
-# codex 根据你的配置调用
-codex review --diff "$(git diff main...HEAD)"
 ```
+
+codex 审查走独立 Bash 命令（**不能用 `Skill` 工具调用**：`/codex:review` 设了 `disable-model-invocation: true`）。`${CLAUDE_PLUGIN_ROOT}` 不是 shell 变量，需用 `find` 动态解析插件安装路径，并用 `--base` 指定原分支作为审查基线：
+
+```bash
+node "$(find ~/.claude/plugins/cache/openai-codex -name 'codex-companion.mjs' -type f 2>/dev/null | head -1)" review "--base <base-branch>"
+```
+
+> codex 会自动以 `<base-branch>...HEAD`（从 merge-base 起算）为审查范围，无需手动传 diff。
 
 三路全部返回后，主 agent 合并反馈：
 
@@ -177,8 +188,8 @@ codex review --diff "$(git diff main...HEAD)"
 # 单测：覆盖正常路径、边界、错误路径
 <your-test-command>
 
-# 全部通过后合并
-git checkout main
+# 全部通过后合并回原分支
+git checkout <base-branch>
 git merge feature/<task-name> --no-ff -m "feat: <task-name>"
 git worktree remove ../$(basename $PWD)-feature
 ```
