@@ -165,6 +165,15 @@ git diff <base-branch>...HEAD          # 详细 diff
 
 有明显问题直接修复或重跑对应 Task，不要留到审查阶段。
 
+初审通过后、启动 Phase 5 之前，**必须**先执行：
+
+```bash
+git add --intent-to-add $(git ls-files --others --exclude-standard)
+```
+
+> 将所有 untracked 文件标记为 intent-to-add，使它们出现在 `git diff` 输出中（显示为全量新增）。
+> 这样 Codex 审查才能看到完整变更，而不会真正暂存文件内容，不影响后续 commit。
+
 ---
 
 ## Phase 5：并发代码审查
