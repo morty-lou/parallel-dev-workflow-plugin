@@ -16,7 +16,7 @@ description: 长程并发开发工作流。涉及多个模块/文件的复杂编
 ## 工作流总览
 
 ```
-Phase 1  探索 & Plan      ← 主 agent 独立完成，输出充分的 .plan.md
+Phase 1  探索 & Plan      ← 委托 Plan 子 agent 完成，主 agent 写入 .plan.md
 Phase 2  Worktree 隔离    ← 主 agent 建立独立分支环境
 Phase 3  并发代码写作      ← Task 调用 code-writer 子 agent 并发执行
 Phase 4  主 agent 初审    ← git diff 快速一致性检查
@@ -26,67 +26,86 @@ Phase 6  优化 → 单测 → 合并
 
 ---
 
-## Phase 1：探索 & Plan
+## Phase 1：探索 & Plan（委托 Plan 子 agent）
 
-主 agent 完整探索后输出 `.plan.md`，**不在此阶段写任何代码**。
+主 agent 将探索和规划委托给 Plan 子 agent，**主 agent 和 Plan 阶段均不写任何代码**。
 
-### 探索步骤
-1. 理解需求边界（功能、约束、验收标准）
-2. 阅读相关代码文件，理解现有架构和接口
-3. 识别需要新增/修改的模块，拆分为独立 task
-4. 分析任务依赖关系，规划并发批次
+### 调用方式
 
-### Plan 充分性标准（关键）
+使用 `Agent` 工具调用 Plan 子 agent，在 prompt 中附带用户需求和 plan 格式模板：
 
-由于 Task 工具是 fork-join 模型，子 agent 启动后无法中途补充信息，每个 task 的描述必须满足：
-
-- **接口明确**：依赖的类型/函数签名直接写在 plan 里，不要只写文件路径
-- **行为具体**：描述「做什么」而不只是「实现 xxx 功能」，包括边界处理
-- **背景内联**：把子 agent 需要了解的现有逻辑摘录进来
-- **约束显式**：不允许修改的文件、必须兼容的接口，明确列出
-
-> **自检**：写完每个 task 后问自己：「如果我是子 agent，只看这段描述，能不能不查任何其他文件就开始写代码？」答案是否则继续补充。
-
-### Plan 格式（保存为 `.plan.md`）
-
-```markdown
-# Task Plan: <task-name>
-> Branch: feature/<task-name>
-
-## 需求摘要
-
-## 全局约束
-- 语言/框架版本:
-- 命名约定:
-- 测试框架:
-- lint 命令:
-- 不允许改动的文件:
-
-## 任务分解
-
-### Task-1: <模块名>
-- **目标文件**: `src/xxx/yyy.ts`（新增 / 修改）
-- **工作内容**: <具体描述，含函数名、参数、返回值、边界处理>
-- **依赖的接口**（直接粘贴签名）:
-  ```typescript
-  // from src/types/user.ts
-  interface IUser { id: string; name: string }
-  ```
-- **需要暴露的接口**:
-  ```typescript
-  export function doSomething(input: InputType): OutputType
-  ```
-- **背景信息**: <内联相关逻辑摘要>
-- **注意事项**: <并发安全、错误处理方式等>
-
-## 任务依赖图
-Task-1 ──► Task-3
-Task-2 ──► Task-3
-
-## 并发批次
-- 第一批: Task-1, Task-2（同时启动）
-- 第二批: Task-3（等第一批全部完成后启动）
 ```
+Agent({
+  subagent_type: "Plan",
+  prompt: """
+  <用户的完整需求描述>
+
+      重要：系统已安装 rg（ripgrep）和 fd，可直接在 Bash 中使用，不要用 grep -r 或 find。
+
+      请充分探索代码库后，按以下格式输出完整的实施计划。
+      如有任何不确定的需求细节或技术疑问，请及时提出，或请在 plan 中明确列出，不要自行假设。
+
+      输出格式（严格遵循）：
+
+      # Task Plan: <task-name>
+      > Branch: feature/<task-name>
+
+      ## 需求摘要
+
+      ## 全局约束
+      - 语言/框架版本:
+      - 命名约定:
+      - 测试框架:
+      - lint 命令:
+      - 不允许改动的文件:
+
+      ## 任务分解
+
+      ### Task-1: <模块名>
+      - **目标文件**: \`src/xxx/yyy.ts\`（新增 / 修改）
+      - **工作内容**: <具体描述，含函数名、参数、返回值、边界处理>
+      - **依赖的接口**（直接粘贴签名）:
+        \`\`\`typescript
+        // from src/types/user.ts
+        interface IUser { id: string; name: string }
+        \`\`\`
+      - **需要暴露的接口**:
+        \`\`\`typescript
+        export function doSomething(input: InputType): OutputType
+        \`\`\`
+      - **背景信息**: <内联相关逻辑摘要>
+      - **注意事项**: <并发安全、错误处理方式等>
+
+      ## 任务依赖图
+      Task-1 ──► Task-3
+      Task-2 ──► Task-3
+
+      ## 并发批次
+      - 第一批: Task-1, Task-2（同时启动）
+      - 第二批: Task-3（等第一批全部完成后启动）
+
+      ## 待确认问题
+      - <如有不确定之处，在此列出，不要自行假设>
+
+      Plan 充分性标准：由于后续代码写作通过 Task 工具 fork-join 并发执行，子 agent
+      启动后无法中途补充信息。每个 task 的描述必须满足：
+      - 接口明确：依赖的类型/函数签名直接写在 plan 里，不要只写文件路径
+      - 行为具体：描述「做什么」而不只是「实现 xxx 功能」，包括边界处理
+      - 背景内联：把子 agent 需要了解的现有逻辑摘录进来
+      - 约束显式：不允许修改的文件、必须兼容的接口，明确列出
+      """
+})
+```
+
+### Plan 返回后的处理
+
+Plan 子 agent 返回 plan 文本后，主 agent 负责：
+
+1. **写入文件**：将 plan 内容写入 `.plan.md`（Plan 子 agent 没有 Write 工具）
+2. **检查待确认问题**：如 plan 中有「待确认问题」，先向用户确认再进入 Phase 2
+3. **验证充分性**：快速扫一遍每个 task 描述，确保子 agent 不需要额外提问就能动手
+
+> Plan 子 agent 的探索过程（读取大量代码文件）在子 agent context 中完成，**不消耗主 agent context**。
 
 ---
 
